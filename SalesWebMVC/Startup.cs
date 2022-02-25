@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using SalesWebMVC.Models;
 using SalesWebMVC.Data;
+using SalesWebMVC.Services;
 
 namespace SalesWebMVC
 {
@@ -40,6 +41,7 @@ namespace SalesWebMVC
             services.AddDbContext<SalesWebMVCContext>(options =>
                     options.UseSqlServer(Configuration.GetConnectionString("SalesWebMVCContext")));
             services.AddScoped<SeedingService>();
+            services.AddTransient<SellerService>();
         
         
         
