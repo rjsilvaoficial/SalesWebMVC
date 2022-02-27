@@ -72,6 +72,26 @@ namespace SalesWebMVC.Controllers
             _sellerService.Remove(id);
             return RedirectToAction(nameof(Index));
         }
+
+
+        public IActionResult Details(int? id)
+        {
+            if(id == null)
+            {
+                return NotFound();
+            }
+            //Como consideramos a possibilidade de nullable no id, o FindById deve receber o id.Value
+            var seller = _sellerService.FindById(id.Value);
+
+            if(seller == null)
+            {
+                return NotFound();
+            }
+
+            return View(seller);
+
+
+        }
     }
 }
 
