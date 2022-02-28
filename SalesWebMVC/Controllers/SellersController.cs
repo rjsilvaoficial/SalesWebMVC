@@ -2,6 +2,7 @@
 using SalesWebMVC.Models;
 using SalesWebMVC.Models.ViewModels;
 using SalesWebMVC.Services;
+using SalesWebMVC.Services.Exceptions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -31,7 +32,7 @@ namespace SalesWebMVC.Controllers
          * The get will be return a view to you, and with a view giving to you access for a form for example, you can do your post!
          * How can you make a post, if you don't have a address in your browser to make him?
          */
-        [HttpGet] 
+        [HttpGet]
         public IActionResult Create()
         {
             var departments = _departmentService.FindAll();
@@ -50,14 +51,14 @@ namespace SalesWebMVC.Controllers
         [HttpGet]
         public IActionResult Delete(int? id)
         {
-            if(id == null)
+            if (id == null)
             {
                 return NotFound();
             }
 
-            //Para casos nullables sempre inclua o atb.Value como parametro em um método que o usará
+            //For nullable cases, ever include the atb.Value as parameter in a method where him will be use
             var seller = _sellerService.FindById(id.Value);
-            if(seller == null)
+            if (seller == null)
             {
                 return NotFound();
             }
@@ -76,23 +77,63 @@ namespace SalesWebMVC.Controllers
 
         public IActionResult Details(int? id)
         {
-            if(id == null)
+            if (id == null)
             {
                 return NotFound();
             }
-            //Como consideramos a possibilidade de nullable no id, o FindById deve receber o id.Value
+            //Like we think in a possibility from a nullable id, FindById needs to receive the id.Value as parameter
             var seller = _sellerService.FindById(id.Value);
 
-            if(seller == null)
+            if (seller == null)
             {
                 return NotFound();
             }
 
             return View(seller);
+        }
 
+        public IActionResult Edit(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+            var seller = _sellerService.FindById(id.Value);
+            if (seller == null)
+            {
+                return NotFound();
+            }
+            /*See... to popule the departments field on own edit view
+             *We needs a department list */
+            List<Department> departments = _departmentService.FindAll();
+            SellerFormViewModel viewModel = new SellerFormViewModel { Seller = seller, Departments = departments };
+            return View(viewModel);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Edit(int id, Seller seller)
+        {
+            if (id != seller.Id)
+            {
+                return BadRequest();
+            }
+            try
+            {
+                _sellerService.Update(seller);
+                return RedirectToAction(nameof(Index));
+            }
+            catch(NotFoundException)
+            {
+                return NotFound();
+            }
+            catch (DbConcurrencyException)
+            {
+                return BadRequest();
+            }
 
         }
     }
 }
 
-                 
+
