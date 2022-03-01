@@ -45,6 +45,12 @@ namespace SalesWebMVC.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Create(Seller seller)
         {
+            if (!ModelState.IsValid)
+            {
+                var departments = _departmentService.FindAll();
+                var viewModel = new SellerFormViewModel { Seller = seller, Departments = departments };
+                return View(viewModel);
+            }
             _sellerService.Insert(seller);
             return RedirectToAction(nameof(Index));
         }
@@ -54,7 +60,7 @@ namespace SalesWebMVC.Controllers
         {
             if (id == null)
             {
-                return RedirectToAction(nameof(Error), new {message = "Id not provided!" });
+                return RedirectToAction(nameof(Error), new { message = "Id not provided!" });
             }
 
             //For nullable cases, ever include the atb.Value as parameter in a method where him will be use
@@ -87,7 +93,7 @@ namespace SalesWebMVC.Controllers
 
             if (seller == null)
             {
-                return RedirectToAction(nameof(Error), new {message = "Seller not found!" });
+                return RedirectToAction(nameof(Error), new { message = "Seller not found!" });
             }
 
             return View(seller);
@@ -115,6 +121,21 @@ namespace SalesWebMVC.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Edit(int id, Seller seller)
         {
+            /* 
+             * The first conditional looks the ModelState vality
+             * Returning for a View() using a SellerFormViewModel as base
+             * For do this, the conditional brings in her body a Departments list
+             * Together him, the Seller instance that was inserted into Edit() parameters
+             * And with this two itens, is composed a SellerFormViewModel instance
+             * This for turn her into feeding for View() method, serving as base to construct a Edit page 
+             * This implementation, looks to prevines invalids HttpPosts requisitions  using off-js
+             */
+            if (!ModelState.IsValid)
+            {
+                var departments = _departmentService.FindAll();
+                var viewModel = new SellerFormViewModel { Seller = seller, Departments = departments };
+                return View(viewModel);
+            }
             if (id != seller.Id)
             {
                 return RedirectToAction(nameof(Error), new { message = "Id miss match!" });
@@ -124,7 +145,7 @@ namespace SalesWebMVC.Controllers
                 _sellerService.Update(seller);
                 return RedirectToAction(nameof(Index));
             }
-            catch(NotFoundException e)
+            catch (NotFoundException e)
             {
                 return RedirectToAction(nameof(Error), new { message = e.Message });
             }

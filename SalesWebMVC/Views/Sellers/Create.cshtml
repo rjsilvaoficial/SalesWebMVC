@@ -13,10 +13,12 @@
         <form asp-action="Create">
             <div class="form-group">
                 <label asp-for="Seller.Name" class="control-label"></label>
+                <span asp-validation-for="Seller.Name" class="text-danger"></span>
                 <input asp-for="Seller.Name" class="form-control" />
             </div>
             <div class="form-group">
                 <label asp-for="Seller.Email" class="control-label"></label>
+                <span asp-validation-for="Seller.Email"></span>
                 <input asp-for="Seller.Email" class="form-control" />
             </div>
             <div class="form-group">
@@ -37,4 +39,8 @@
         </form>
     </div>
 </div>
+
+@section Scripts{
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
 
