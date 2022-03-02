@@ -35,15 +35,22 @@ namespace SalesWebMVC.Services
 
         public async Task RemoveAsync(int id)
         {
-            var seller = await _context.Seller.FindAsync(id);
-            _context.Remove(seller);
-            await _context.SaveChangesAsync();
+            try
+            {            
+                var seller = await _context.Seller.FindAsync(id);
+                _context.Remove(seller);
+                await _context.SaveChangesAsync();
+            }
+            catch(DbUpdateException e)
+            {
+                throw new IntegrityException(e.Message);
+            }
         }
 
         public async Task UpdateAsync(Seller sellerAtual)
         {
             var sellerCadastrado = await _context.Seller.AnyAsync(seller => seller.Id == sellerAtual.Id);
-            if(!sellerCadastrado)
+            if (!sellerCadastrado)
             {
                 throw new NotFoundException("Seller was not encountered!");
             }
@@ -57,8 +64,8 @@ namespace SalesWebMVC.Services
              *He will be register this trouble as DbUpdateConcurrencyException
              *With this "catch" configuration, we restriced this exception propagation only to the service layer,
              *this, on your time kickening our own exception called by DbConcurrencyException on service level
-             *Maintaining the layers pattern integrity*/            
-            catch(DbUpdateConcurrencyException e)
+             *Maintaining the layers pattern integrity*/
+            catch (DbUpdateConcurrencyException e)
             {
                 throw new DbConcurrencyException(e.Message);
             }
